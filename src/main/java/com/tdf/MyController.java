@@ -1,17 +1,31 @@
 package com.tdf;
 
+import com.tdf.graphql.MyGraphQLSchema;
+import graphql.ExecutionResult;
+import graphql.GraphQL;
+import graphql.schema.GraphQLObjectType;
+import graphql.schema.GraphQLSchema;
 import io.dropwizard.hibernate.UnitOfWork;
 
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
 public class MyController {
 
+    private MyGraphQLSchema myGraphQLSchema;
+
     private DeviceDAO  deviceDAO;
-    public MyController(DeviceDAO  deviceDAO) {	        this.deviceDAO = deviceDAO;	    }
+    public MyController(DeviceDAO  deviceDAO, MyGraphQLSchema myGraphQLSchema) {
+        this.myGraphQLSchema=myGraphQLSchema;
+        this.deviceDAO = deviceDAO;
+    }
 
     @GET
     @Path("/hello/{name}")
@@ -61,9 +75,24 @@ public class MyController {
     public Object getDeviceByName(@QueryParam(value = "deviceName") String name){
         Object d = (List<Device>) deviceDAO.findDeviceByName(name);
         if(null==d){
+            //TODO Neeraj : Check this
             return "Cannot Find the device with name : " + name + "...!!";
         }
         return d;
     }
 
+
+    @POST
+    @UnitOfWork
+    @Path("/getDevics")
+    @Consumes(MediaType.TEXT_PLAIN)
+    public Object getDevics(@Valid String query) throws IOException {
+
+        Logger.getLogger("MyLogger").log(Level.INFO,"Query is : " + query);
+
+        GraphQL graphQL = myGraphQLSchema.getGraphQL();
+
+        ExecutionResult result = graphQL.execute(query);
+        return result;
+    }
 }

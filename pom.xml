@@ -20,6 +20,7 @@
         </plugins>
     </build>
 
+
     <properties>
         <dropwizard.version>2.0.2</dropwizard.version>
     </properties>
@@ -53,8 +54,14 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.graphql-java</groupId>
+            <artifactId>graphql-java</artifactId>
+            <version>11.0</version>
+        </dependency>
+
+
 
     </dependencies>
-
 
 </project>

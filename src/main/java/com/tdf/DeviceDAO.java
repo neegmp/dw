@@ -20,8 +20,12 @@ public class DeviceDAO extends AbstractDAO<Device> {
     public List<Device> findAll() {
         CriteriaBuilder builder = currentSession().getCriteriaBuilder();
         CriteriaQuery<Device> cq = builder.createQuery(Device.class);
-        cq.getOrderList();
-        return list(cq);
+        //cq.getOrderList();
+        Root<Device> dev = cq.from(Device.class);
+        cq.select(dev);
+        out.println("Results : "  + list(cq).size());
+        return  list(cq);
+                //list(cq);
     }
 
     public List<Device> findAllDeviceBrands() {

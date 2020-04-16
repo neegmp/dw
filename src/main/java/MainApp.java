@@ -2,6 +2,8 @@ import com.tdf.Config;
 import com.tdf.Device;
 import com.tdf.DeviceDAO;
 import com.tdf.MyController;
+import com.tdf.graphql.DeviceDataFetcher;
+import com.tdf.graphql.MyGraphQLSchema;
 import io.dropwizard.Application;
 import io.dropwizard.db.DataSourceFactory;
 import io.dropwizard.hibernate.HibernateBundle;
@@ -17,8 +19,12 @@ public class MainApp extends Application<Config> {
 
     public void run(Config config, Environment environment) throws Exception {
 
+
         final DeviceDAO deviceDAO = new DeviceDAO(hibernate.getSessionFactory());
-        final MyController resource = new MyController(deviceDAO);
+        final DeviceDataFetcher df = new DeviceDataFetcher(deviceDAO);
+        final MyGraphQLSchema sch = new MyGraphQLSchema(df);
+        sch.init();
+        final MyController resource = new MyController(deviceDAO, sch);
         environment.
                 jersey().register(resource);
 
@@ -26,7 +32,7 @@ public class MainApp extends Application<Config> {
     }
 
 
-    private HibernateBundle<Config> hibernate = new HibernateBundle<Config>(Device.class) {
+    public HibernateBundle<Config> hibernate = new HibernateBundle<Config>(Device.class) {
         public DataSourceFactory getDataSourceFactory(Config configuration) {
             final DataSourceFactory database = configuration.getDatabase();
             return database;
